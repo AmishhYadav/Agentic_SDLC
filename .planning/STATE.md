@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-03-PLAN.md
-last_updated: "2026-07-09T19:51:31.964Z"
+stopped_at: Plan 01-02 blocked at Task 2 (Azure DevOps PAT expired) — Script A failed
+last_updated: "2026-07-09T20:11:48.095Z"
 last_activity: 2026-07-09
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 3
   completed_plans: 2
-  percent: 0
+  percent: 13
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-07-09)
 ## Current Position
 
 Phase: 01 (scaffolding-thin-end-to-end-slice) — EXECUTING
-Plan: 3 of 3
-Status: Ready to execute
-Last activity: 2026-07-09
+Plan: 2 of 3 (BLOCKED — Task 2 of 2 not started; see Blockers/Concerns)
+Status: Blocked — Azure DevOps PAT expired, Script A failed, awaiting fresh PAT
+Last activity: 2026-07-10
 
-Progress: [███████░░░] 67%
+Progress: [███████░░░] 67% (note: 01-02 is NOT complete — SUMMARY documents a blocked run; Task 2 remains)
 
 ## Performance Metrics
 
@@ -54,6 +54,7 @@ Progress: [███████░░░] 67%
 *Updated after each plan completion*
 | Phase 01 P01 | 20min | 3 tasks | 19 files |
 | Phase 01 P03 | 4min | 2 tasks | 6 files |
+| Phase 01 P02 | ~12min | 1 (of 2, blocked) tasks | 4 files |
 
 ## Accumulated Context
 
@@ -69,6 +70,7 @@ Recent decisions affecting current work:
 - [Phase 01]: Confirmed AsyncSqliteSaver.setup() takes no arguments and is idempotent (internal is_setup guard) — Resolved research Assumption A2 by reading installed package source directly; no deviation needed
 - [Phase 01]: Vite dev-server proxy chosen over hardcoded backend base URL + CORS to keep frontend a pure consumer of Plan 01-01 routes (backend files untouched)
 - [Phase 01]: Hand-rolled useEffect/setInterval polling used in RunPage instead of react-query's refetchInterval for this single-query demo slice
+- [Phase 01]: ado_client.py built and verified against static acceptance criteria (exports, json-patch content-type, Hierarchy-Reverse, Basic auth all present); Script A run against real ADO target FAILED due to expired PAT (confirmed independently via raw diagnostic call, not a code defect) — Task 2 (wiring push_to_ado) deliberately not started per plan's D-12 sequencing gate; requires fresh PAT before resuming
 
 ### Pending Todos
 
@@ -79,6 +81,7 @@ None yet.
 - Phase 1 (LangGraph interrupt/resume + FastAPI wiring) flagged by research as needing a closer look during planning — replay-from-start-on-resume semantics are subtle; keep side effects out of the interrupt-calling node
 - Phase 5 (Brownfield RAG) flagged by research as needing a closer look during planning — chunking strategy and NVIDIA embedding `input_type` wiring have real implementation subtlety
 - NVIDIA NIM free-tier model ID churns frequently — confirm the live model ID via `GET /v1/models` before each work session rather than trusting a hardcoded ID
+- Plan 01-02 blocked at Task 2: Azure DevOps PAT expired. Script A (backend/scripts/script_a_ado_smoke_test.py) confirmed FAIL with 401 'Access Denied: The Personal Access Token used has expired.' User must generate a fresh PAT (Work Items Read & Write scope, long expiry) and update ADO_PAT in backend/.env, then re-run Script A before push_to_ado wiring (Task 2) can proceed.
 
 ## Deferred Items
 
@@ -90,6 +93,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-09T19:51:31.958Z
-Stopped at: Completed 01-03-PLAN.md
-Resume file: None
+Last session: 2026-07-09T20:11:39.966Z
+Stopped at: Plan 01-02 blocked at Task 2 (Azure DevOps PAT expired) — Script A failed
+Resume file: .planning/phases/01-scaffolding-thin-end-to-end-slice/01-02-PLAN.md

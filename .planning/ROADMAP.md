@@ -43,7 +43,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 01-02-PLAN.md — Script A ADO smoke test + real ado_client wired into push_to_ado, replacing the stub (PUSH-01, PUSH-02, PUSH-03); gated behind ADO org/project/PAT provisioning (D-11)
+- [ ] 01-02-PLAN.md — Script A ADO smoke test + real ado_client wired into push_to_ado, replacing the stub (PUSH-01, PUSH-02, PUSH-03); gated behind ADO org/project/PAT provisioning (D-11). **BLOCKED (partial):** ado_client.py built and passes all static acceptance criteria; Script A run against the real ADO target FAILED (PAT expired) — Task 2 (wiring push_to_ado) not started. See 01-02-SUMMARY.md.
 - [x] 01-03-PLAN.md — Minimal React + Vite page (Start/poll/Approve) wired to the Plan 01-01 backend routes (D-07/D-08)
 
 **Cross-cutting constraints:**
