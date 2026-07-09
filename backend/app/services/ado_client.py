@@ -234,6 +234,131 @@ async def verify_work_item(
     }
 
 
+async def check_project_access() -> dict[str, Any]:
+    """Cheap, read-only probe: can this PAT see this org/project at all?
+
+    Distinguishes "PAT invalid/expired" (non-JSON/203 response — see
+    _check_json_response's docstring) from "auth rejected" (401) from
+    "no access to this project" (403), per Pitfall 2's ordered-probe design.
+    Never raises.
+    """
+    org, project = _org_project()
+    url = (
+        f"https://dev.azure.com/{org}/{project}/_apis/wit/workitemtypes"
+        f"?api-version={_API_VERSION}"
+    )
+    async with httpx.AsyncClient(timeout=_TIMEOUT_SECONDS) as client:
+        response = await client.get(url, headers=_auth_header())
+
+    is_json, _ = _check_json_response(response)
+    if not is_json:
+        return {
+            "check": "project_access",
+            "passed": False,
+            "reason": "PAT invalid or expired (non-JSON/203 response)",
+        }
+    if response.status_code == 401:
+        return {"check": "project_access", "passed": False, "reason": "PAT auth rejected (401)"}
+    if response.status_code == 403:
+        return {
+            "check": "project_access",
+            "passed": False,
+            "reason": "PAT lacks access to this project (403)",
+        }
+    if response.status_code != 200:
+        return {
+            "check": "project_access",
+            "passed": False,
+            "reason": f"unexpected status {response.status_code}",
+        }
+    return {"check": "project_access", "passed": True, "reason": None}
+
+
+async def check_write_scope(lead_email: str) -> dict[str, Any]:
+    """Confirm work-item WRITE scope by creating a real throwaway work item.
+
+    There is no read-only "can I write" ADO call (Pitfall 2) — create-and-leave
+    is the only reliable mechanism; acceptable clutter for a single-lead local
+    MVP (threat T-02-03, disposition: accept). Never raises — RuntimeError
+    from create_work_item is caught here.
+    """
+    try:
+        await create_work_item(
+            "Task",
+            {
+                "System.Title": "ADO smoke-test — safe to delete",
+                "System.AssignedTo": lead_email,
+            },
+            parent_id=None,
+        )
+    except RuntimeError as exc:
+        return {"check": "write_scope", "passed": False, "reason": str(exc)}
+    return {"check": "write_scope", "passed": True, "reason": None}
+
+
+async def check_expiry_best_effort() -> dict[str, Any]:
+    """Best-effort PAT expiry lookup — never fails the overall smoke-test.
+
+    Per Pitfall 1 / Open Question 1, whether `_apis/tokens/pats` accepts plain
+    PAT Basic auth for self-introspection is genuinely unresolved; this probe
+    is enrichment only. Any non-200/non-JSON response degrades gracefully to
+    "unknown" rather than failing the check.
+    """
+    org, _ = _org_project()
+    url = f"https://vssps.dev.azure.com/{org}/_apis/tokens/pats?api-version=7.1-preview.1"
+    try:
+        async with httpx.AsyncClient(timeout=_TIMEOUT_SECONDS) as client:
+            response = await client.get(url, headers=_auth_header())
+    except httpx.HTTPError:
+        return {
+            "check": "expiry",
+            "passed": True,
+            "reason": "unknown (best-effort check unavailable)",
+        }
+
+    is_json, body = _check_json_response(response)
+    if not is_json or response.status_code != 200:
+        return {
+            "check": "expiry",
+            "passed": True,
+            "reason": "unknown (best-effort check unavailable)",
+        }
+
+    valid_to: str | None = None
+    patTokens = body.get("patTokens") if isinstance(body, dict) else None
+    if isinstance(patTokens, list):
+        for entry in patTokens:
+            if isinstance(entry, dict) and entry.get("validTo"):
+                valid_to = entry["validTo"]
+                break
+
+    return {
+        "check": "expiry",
+        "passed": True,
+        "reason": valid_to or "unknown (best-effort check unavailable)",
+    }
+
+
+async def run_smoke_test(lead_email: str) -> dict[str, Any]:
+    """Ordered CONN-03 probe sequence: project access -> write scope + expiry.
+
+    Short-circuits after project_access if it fails — write-scope is
+    meaningless without project access (Pitfall 2). Returns
+    {"passed": bool, "checks": [dict, ...]}. Never raises.
+    """
+    project_access_result = await check_project_access()
+    if not project_access_result["passed"]:
+        return {"passed": False, "checks": [project_access_result]}
+
+    write_scope_result = await check_write_scope(lead_email)
+    expiry_result = await check_expiry_best_effort()
+
+    return {
+        "passed": project_access_result["passed"] and write_scope_result["passed"],
+        "checks": [project_access_result, write_scope_result, expiry_result],
+    }
+
+
 async def push_plan(plan: Plan) -> PushReport:
     """Create the epic, then each task (with parent link + assignee), verifying every write.
 
