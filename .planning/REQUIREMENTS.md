@@ -20,8 +20,8 @@ Requirements for the 2-day MVP. Each maps to a roadmap phase.
 
 ### Repo Understanding
 
-- [ ] **REPO-01**: Tool detects whether the repo is greenfield or brownfield and branches accordingly
-- [ ] **REPO-02**: Greenfield path reads the repo's project docs to ground plan generation
+- [x] **REPO-01**: Tool detects whether the repo is greenfield or brownfield and branches accordingly
+- [x] **REPO-02**: Greenfield path reads the repo's project docs to ground plan generation
 - [ ] **REPO-03**: Brownfield path ingests the existing codebase (shallow clone, filtered) and embeds it for RAG
 - [ ] **REPO-04**: Brownfield path generates an onboarding summary of what exists before planning, so the team understands the codebase first
 
@@ -103,8 +103,8 @@ Explicitly excluded for this MVP. Documented to prevent scope creep.
 | CONN-03 | Phase 2 | Complete |
 | TEAM-01 | Phase 2 | Complete |
 | TEAM-02 | Phase 2 | Complete |
-| REPO-01 | Phase 2 | Pending |
-| REPO-02 | Phase 2 | Pending |
+| REPO-01 | Phase 2 | Complete |
+| REPO-02 | Phase 2 | Complete |
 | REPO-03 | Phase 5 | Pending |
 | REPO-04 | Phase 5 | Pending |
 | PLAN-01 | Phase 2 | Pending |

@@ -74,7 +74,7 @@ Plans:
 
 **Wave 2** *(depends on 02-01)*
 
-- [ ] 02-03-PLAN.md — Greenfield GitHub doc fetch (tree enumeration + targeted README/docs/**/*.md content) and the real greenfield/brownfield conditional edge, gated behind the smoke-test result (REPO-01, REPO-02)
+- [x] 02-03-PLAN.md — Greenfield GitHub doc fetch (tree enumeration + targeted README/docs/**/*.md content) and the real greenfield/brownfield conditional edge, gated behind the smoke-test result (REPO-01, REPO-02)
 
 **Wave 3** *(depends on 02-03)*
 
@@ -139,7 +139,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Scaffolding + Thin End-to-End Slice | 2/3 | In Progress|  |
-| 2. Config, Team & Greenfield Planning | 2/4 | In Progress|  |
+| 2. Config, Team & Greenfield Planning | 3/4 | In Progress|  |
 | 3. Skill/Load-Aware Assignment & Risk Scoring | 0/TBD | Not started | - |
 | 4. Plan Editing — Direct & Chat with Diff Preview | 0/TBD | Not started | - |
 | 5. Brownfield Codebase RAG & Onboarding Summary | 0/TBD | Not started | - |
