@@ -9,7 +9,7 @@ pass/fail result so runs.py can surface it and block the run on failure
 
 Note: this node only detects and surfaces a failed smoke-test via the state
 fields below. It intentionally does NOT halt graph execution before
-stub_plan/generate_plan runs — that requires a conditional edge in build.py,
+generate_plan runs — that requires a conditional edge in build.py,
 which Plan 03 owns (see 02-01-PLAN.md's "Note on blocking").
 """
 

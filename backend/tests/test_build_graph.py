@@ -47,6 +47,7 @@ async def test_compiled_graph_reaches_read_docs_greenfield_for_greenfield_state(
     monkeypatch.setenv("GITHUB_TOKEN", "fake-token")
 
     passing_result = {"passed": True, "checks": []}
+    from app.models.plan import Plan
 
     with (
         patch(
@@ -56,6 +57,11 @@ async def test_compiled_graph_reaches_read_docs_greenfield_for_greenfield_state(
         patch(
             "app.graph.nodes.read_docs_greenfield.github_client.fetch_greenfield_docs",
             return_value="some docs",
+        ),
+        patch("app.graph.nodes.generate_plan.build_chat_llm", return_value=object()),
+        patch(
+            "app.graph.nodes.generate_plan.generate_plan_with_repair",
+            return_value=Plan(epics=[]),
         ),
     ):
         graph = build_graph().compile(checkpointer=InMemorySaver())

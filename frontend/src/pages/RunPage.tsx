@@ -115,7 +115,8 @@ export default function RunPage() {
                 {epic.tasks.map((task) => (
                   <li key={task.id}>
                     {task.title} — assignee: {task.suggested_assignee} —
-                    estimate: {task.estimate_hours}h
+                    estimate: {task.estimate_hours}h — skill:{" "}
+                    {task.skill_tag ?? "none"}
                   </li>
                 ))}
               </ul>
