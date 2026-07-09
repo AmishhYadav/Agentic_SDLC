@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-01-PLAN.md
-last_updated: "2026-07-09T19:42:11.947Z"
+stopped_at: Completed 01-03-PLAN.md
+last_updated: "2026-07-09T19:51:31.964Z"
 last_activity: 2026-07-09
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-07-09)
 ## Current Position
 
 Phase: 01 (scaffolding-thin-end-to-end-slice) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-07-09
 
-Progress: [███░░░░░░░] 33%
+Progress: [███████░░░] 67%
 
 ## Performance Metrics
 
@@ -53,6 +53,7 @@ Progress: [███░░░░░░░] 33%
 
 *Updated after each plan completion*
 | Phase 01 P01 | 20min | 3 tasks | 19 files |
+| Phase 01 P03 | 4min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -66,6 +67,8 @@ Recent decisions affecting current work:
 - Roadmap: Brownfield RAG (REPO-03, REPO-04) sequenced last as Phase 5 — highest complexity, most cuttable if the 2-day budget runs short; greenfield (Phase 2) is the primary demo path
 - [Phase 01]: Used Python 3.13 (Homebrew) for backend venv since system python3 was 3.9.6, below the project's 3.12+ floor — Environment-only choice, no code impact
 - [Phase 01]: Confirmed AsyncSqliteSaver.setup() takes no arguments and is idempotent (internal is_setup guard) — Resolved research Assumption A2 by reading installed package source directly; no deviation needed
+- [Phase 01]: Vite dev-server proxy chosen over hardcoded backend base URL + CORS to keep frontend a pure consumer of Plan 01-01 routes (backend files untouched)
+- [Phase 01]: Hand-rolled useEffect/setInterval polling used in RunPage instead of react-query's refetchInterval for this single-query demo slice
 
 ### Pending Todos
 
@@ -87,6 +90,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-09T19:42:11.941Z
-Stopped at: Completed 01-01-PLAN.md
+Last session: 2026-07-09T19:51:31.958Z
+Stopped at: Completed 01-03-PLAN.md
 Resume file: None

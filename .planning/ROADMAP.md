@@ -44,7 +44,7 @@ Plans:
 **Wave 2** *(blocked on Wave 1 completion)*
 
 - [ ] 01-02-PLAN.md — Script A ADO smoke test + real ado_client wired into push_to_ado, replacing the stub (PUSH-01, PUSH-02, PUSH-03); gated behind ADO org/project/PAT provisioning (D-11)
-- [ ] 01-03-PLAN.md — Minimal React + Vite page (Start/poll/Approve) wired to the Plan 01-01 backend routes (D-07/D-08)
+- [x] 01-03-PLAN.md — Minimal React + Vite page (Start/poll/Approve) wired to the Plan 01-01 backend routes (D-07/D-08)
 
 **Cross-cutting constraints:**
 
@@ -118,7 +118,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Scaffolding + Thin End-to-End Slice | 1/3 | In Progress|  |
+| 1. Scaffolding + Thin End-to-End Slice | 2/3 | In Progress|  |
 | 2. Config, Team & Greenfield Planning | 0/TBD | Not started | - |
 | 3. Skill/Load-Aware Assignment & Risk Scoring | 0/TBD | Not started | - |
 | 4. Plan Editing — Direct & Chat with Diff Preview | 0/TBD | Not started | - |
