@@ -147,3 +147,7 @@ Expect a `PASS: work item id=... created at https://dev.azure.com/{org}/{project
 ---
 *Phase: 01-scaffolding-thin-end-to-end-slice*
 *Completed: 2026-07-10 (partial — Task 2 blocked)*
+
+## Self-Check: PASSED
+
+All 4 claimed created files verified present on disk; both commit hashes (5388fd7, 93a2049) verified present in git log.
