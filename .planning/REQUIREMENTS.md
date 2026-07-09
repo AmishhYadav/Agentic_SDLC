@@ -9,9 +9,9 @@ Requirements for the 2-day MVP. Each maps to a roadmap phase.
 
 ### Connection & Config
 
-- [ ] **CONN-01**: Lead can configure an Azure DevOps project connection using a single shared PAT (no OAuth/login)
-- [ ] **CONN-02**: Lead can configure a GitHub repo to plan from
-- [ ] **CONN-03**: On connect, the tool smoke-tests the ADO PAT and surfaces a clear pass/fail (scope, expiry, project access)
+- [x] **CONN-01**: Lead can configure an Azure DevOps project connection using a single shared PAT (no OAuth/login)
+- [x] **CONN-02**: Lead can configure a GitHub repo to plan from
+- [x] **CONN-03**: On connect, the tool smoke-tests the ADO PAT and surfaces a clear pass/fail (scope, expiry, project access)
 
 ### Team Roster
 
@@ -98,9 +98,9 @@ Explicitly excluded for this MVP. Documented to prevent scope creep.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CONN-01 | Phase 2 | Pending |
-| CONN-02 | Phase 2 | Pending |
-| CONN-03 | Phase 2 | Pending |
+| CONN-01 | Phase 2 | Complete |
+| CONN-02 | Phase 2 | Complete |
+| CONN-03 | Phase 2 | Complete |
 | TEAM-01 | Phase 2 | Pending |
 | TEAM-02 | Phase 2 | Pending |
 | REPO-01 | Phase 2 | Pending |
