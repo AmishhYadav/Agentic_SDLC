@@ -35,7 +35,7 @@ Requirements for the 2-day MVP. Each maps to a roadmap phase.
 ### Assignment
 
 - [ ] **ASSIGN-01**: Each task gets a suggested assignee based on skill match and experience against the team roster
-- [ ] **ASSIGN-02**: Assignment factors in each member's current real workload by reading their existing open Azure DevOps work items
+- [ ] **ASSIGN-02**: Assignment factors in each member's current load using a within-plan running total (hours assigned so far across the generated plan)
 
 ### Risk
 
@@ -79,6 +79,7 @@ Deferred to future release. Tracked but not in the current roadmap.
 
 - **ASGX-01**: Optimizer/solver-based assignment (LP / simulated annealing) instead of greedy skill+load scoring
 - **ASGX-02**: Historical-velocity-based estimation once historical delivery data exists
+- **ASGX-03**: Load-awareness reads each member's real existing open Azure DevOps work items instead of a within-plan running total
 
 ## Out of Scope
 
@@ -130,4 +131,4 @@ Explicitly excluded for this MVP. Documented to prevent scope creep.
 
 ---
 *Requirements defined: 2026-07-09*
-*Last updated: 2026-07-09 after roadmap creation*
+*Last updated: 2026-07-09 after scoping load-awareness to within-plan running total (real-ADO-workload deferred to v2 ASGX-03)*

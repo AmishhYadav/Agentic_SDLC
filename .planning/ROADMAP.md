@@ -46,13 +46,13 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: TBD
 
 ### Phase 3: Skill/Load-Aware Assignment & Risk Scoring
-**Goal**: Every task in the plan has a defensible suggested assignee that accounts for real skill match, experience, and each person's actual current ADO workload, and every skill-coverage gap is surfaced as a risk with a reproducible score and a human-readable explanation.
+**Goal**: Every task in the plan has a defensible suggested assignee that accounts for real skill match, experience, and each person's running load within the generated plan, and every skill-coverage gap is surfaced as a risk with a reproducible score and a human-readable explanation.
 **Mode:** mvp
 **Depends on**: Phase 2
 **Requirements**: ASSIGN-01, ASSIGN-02, RISK-01, RISK-02
 **Success Criteria** (what must be TRUE):
   1. Each task shows a suggested assignee chosen by matching required skill and experience against the team roster
-  2. Assignment suggestions visibly shift based on each member's real, current open Azure DevOps work item load, not just an in-plan running total
+  2. Assignment suggestions visibly shift as tasks accumulate, balancing each member's running total load within the generated plan (hours assigned so far)
   3. Each skill-coverage gap produces the same numeric risk score on repeated runs given the same inputs (deterministic, pure-logic scoring, no LLM in the number)
   4. Each surfaced risk includes an AI-written explanation describing the gap, generated over the already-computed score rather than inventing it
 **Plans**: TBD
