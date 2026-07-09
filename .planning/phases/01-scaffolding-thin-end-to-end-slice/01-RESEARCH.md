@@ -523,14 +523,16 @@ curl -X POST http://localhost:8000/runs/{run_id}/resume -d '{"approved": true}'
 | A4 | The frontend should use React (not Next.js) for this phase | Standard Stack, Recommended Project Structure | CLAUDE.md's top-level "Stack" section says "Frontend: Next.js," but CLAUDE.md's later "Technology Stack" (research) section and CONTEXT.md D-07 both say "React"/"React page." This research follows CONTEXT.md D-07 (the more recent, phase-specific locked decision) and the research-derived stack table, since CONTEXT.md explicitly says "minimal React page." Flag this contradiction for the lead to resolve in CLAUDE.md itself — it will resurface in every later frontend phase if left unresolved. |
 | A5 | CLAUDE.md's top "Stack" section also says "LLM: Anthropic API," while the later Technology Stack section says GLM via NVIDIA NIM | (context only — not used in Phase 1, no LLM calls this phase) | Does not affect Phase 1 (no LLM call in this phase per CONTEXT.md), but will need resolving before Phase 2's `generate_plan` node. Noting here so it isn't lost. |
 
-## Open Questions
+## Open Questions (RESOLVED — none blocking Phase 1)
 
-1. **Where does `project-spec.md` live, and can it be obtained/written before Phase 1 execution starts?**
+> Both questions below are non-blocking for Phase 1 and are deferred to Phase 2, as annotated in each recommendation. Phase 1 proceeds using this research's proposed Plan schema (A1) and React per D-07.
+
+1. **Where does `project-spec.md` live, and can it be obtained/written before Phase 1 execution starts?** — RESOLVED (not blocking Phase 1; use proposed schema A1 now, revisit in Phase 2).
    - What we know: CLAUDE.md references it extensively as the canonical plan-schema and LangGraph-pipeline source; CONTEXT.md's canonical_refs section already flags it as "not yet present in the repo."
    - What's unclear: Whether this is an oversight (file should exist and was never committed) or whether the project intends to derive it iteratively during Phase 1.
    - Recommendation: Planner should either (a) treat this research's proposed Plan schema (A1) as the working Phase 1 answer and flag schema stability as a risk for Phase 2, or (b) insert an early plan task to write/obtain `project-spec.md` before the `models/plan.py` implementation task, if time allows within the 2-day budget.
 
-2. **CLAUDE.md's frontend/LLM stack contradiction (A4/A5) — does it need a standing correction?**
+2. **CLAUDE.md's frontend/LLM stack contradiction (A4/A5) — does it need a standing correction?** — RESOLVED (not blocking Phase 1; React per D-07, no LLM this phase; lead to reconcile CLAUDE.md before Phase 2).
    - What we know: Two sections of CLAUDE.md disagree with each other and with CONTEXT.md's locked decisions.
    - What's unclear: Whether this is a stale first-draft section that should be edited, or intentional (e.g., "Stack" section describes an original intent, "Technology Stack" section describes the actual researched/adopted choice).
    - Recommendation: Not a Phase 1 blocker (Phase 1 uses React per D-07, no LLM at all), but the lead should resolve this in CLAUDE.md directly before Phase 2 begins, since Phase 2 is where `generate_plan` (LLM) and the fuller frontend actually get built.
