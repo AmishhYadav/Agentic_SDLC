@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-01-PLAN.md
-last_updated: "2026-07-09T21:08:29.454Z"
+stopped_at: Completed 02-02-PLAN.md
+last_updated: "2026-07-09T21:18:44.448Z"
 last_activity: 2026-07-09
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 7
-  completed_plans: 4
+  completed_plans: 5
   percent: 20
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-07-09)
 ## Current Position
 
 Phase: 02 (config-team-greenfield-planning) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-07-09
 
-Progress: [██████░░░░] 57%
+Progress: [███████░░░] 71%
 
 ## Performance Metrics
 
@@ -56,6 +56,7 @@ Progress: [██████░░░░] 57%
 | Phase 01 P03 | 4min | 2 tasks | 6 files |
 | Phase 01 P02 | ~12min | 1 (of 2, blocked) tasks | 4 files |
 | Phase 02 P01 | 20min | 2 tasks | 10 files |
+| Phase 02 P02 | 25min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -74,6 +75,8 @@ Recent decisions affecting current work:
 - [Phase 01]: ado_client.py built and verified against static acceptance criteria (exports, json-patch content-type, Hierarchy-Reverse, Basic auth all present); Script A run against real ADO target FAILED due to expired PAT (confirmed independently via raw diagnostic call, not a code defect) — Task 2 (wiring push_to_ado) deliberately not started per plan's D-12 sequencing gate; requires fresh PAT before resuming
 - [Phase 02]: Used pytest==9.1.1/pytest-asyncio==1.4.0 (current top PyPI versions) instead of plan's suggested 8.4.2/1.2.0, per plan's own verify-before-pinning instruction
 - [Phase 02]: ingest_config's blocking smoke-test detection/surfacing is complete in Plan 02-01; the conditional edge in build.py that actually halts graph execution is deliberately deferred to Plan 03
+- [Phase 02]: experience_level modeled as a fixed Literal (junior/mid/senior/lead) rather than free text, documented in TeamMember so the frontend select matches exactly
+- [Phase 02]: email-validator==2.3.0 added (verified current) for Pydantic EmailStr support, enforcing email-format validation at the TeamMember request-model layer per threat T-02-04
 
 ### Pending Todos
 
@@ -96,6 +99,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-09T21:08:29.448Z
-Stopped at: Completed 02-01-PLAN.md
+Last session: 2026-07-09T21:18:44.442Z
+Stopped at: Completed 02-02-PLAN.md
 Resume file: None

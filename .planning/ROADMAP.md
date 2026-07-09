@@ -70,7 +70,7 @@ Plans:
 **Wave 1**
 
 - [x] 02-01-PLAN.md — Config/.env load + blocking ADO PAT smoke-test (project access, write scope, best-effort expiry) wired into ingest_config, with pytest scaffold (CONN-01, CONN-02, CONN-03)
-- [ ] 02-02-PLAN.md — Team roster CRUD: SQLite table, TeamMember model, FastAPI routes, minimal React page (TEAM-01, TEAM-02)
+- [x] 02-02-PLAN.md — Team roster CRUD: SQLite table, TeamMember model, FastAPI routes, minimal React page (TEAM-01, TEAM-02)
 
 **Wave 2** *(depends on 02-01)*
 
@@ -139,7 +139,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Scaffolding + Thin End-to-End Slice | 2/3 | In Progress|  |
-| 2. Config, Team & Greenfield Planning | 1/4 | In Progress|  |
+| 2. Config, Team & Greenfield Planning | 2/4 | In Progress|  |
 | 3. Skill/Load-Aware Assignment & Risk Scoring | 0/TBD | Not started | - |
 | 4. Plan Editing — Direct & Chat with Diff Preview | 0/TBD | Not started | - |
 | 5. Brownfield Codebase RAG & Onboarding Summary | 0/TBD | Not started | - |

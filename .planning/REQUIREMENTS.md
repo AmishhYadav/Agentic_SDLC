@@ -15,8 +15,8 @@ Requirements for the 2-day MVP. Each maps to a roadmap phase.
 
 ### Team Roster
 
-- [ ] **TEAM-01**: Lead can add team members with name, designation, skills, and experience level
-- [ ] **TEAM-02**: Lead can edit or remove team members before planning
+- [x] **TEAM-01**: Lead can add team members with name, designation, skills, and experience level
+- [x] **TEAM-02**: Lead can edit or remove team members before planning
 
 ### Repo Understanding
 
@@ -101,8 +101,8 @@ Explicitly excluded for this MVP. Documented to prevent scope creep.
 | CONN-01 | Phase 2 | Complete |
 | CONN-02 | Phase 2 | Complete |
 | CONN-03 | Phase 2 | Complete |
-| TEAM-01 | Phase 2 | Pending |
-| TEAM-02 | Phase 2 | Pending |
+| TEAM-01 | Phase 2 | Complete |
+| TEAM-02 | Phase 2 | Complete |
 | REPO-01 | Phase 2 | Pending |
 | REPO-02 | Phase 2 | Pending |
 | REPO-03 | Phase 5 | Pending |
