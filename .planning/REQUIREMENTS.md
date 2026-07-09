@@ -27,10 +27,10 @@ Requirements for the 2-day MVP. Each maps to a roadmap phase.
 
 ### Plan Generation
 
-- [ ] **PLAN-01**: Tool generates an implementation plan of epics broken into tasks
-- [ ] **PLAN-02**: Each task is tagged with the required skill (constrained to a fixed skill taxonomy for reproducibility)
-- [ ] **PLAN-03**: Each task carries an effort estimate in hours/days
-- [ ] **PLAN-04**: Plan generation validates the LLM's structured output against a schema and repairs/retries on malformed output
+- [x] **PLAN-01**: Tool generates an implementation plan of epics broken into tasks
+- [x] **PLAN-02**: Each task is tagged with the required skill (constrained to a fixed skill taxonomy for reproducibility)
+- [x] **PLAN-03**: Each task carries an effort estimate in hours/days
+- [x] **PLAN-04**: Plan generation validates the LLM's structured output against a schema and repairs/retries on malformed output
 
 ### Assignment
 
@@ -107,10 +107,10 @@ Explicitly excluded for this MVP. Documented to prevent scope creep.
 | REPO-02 | Phase 2 | Complete |
 | REPO-03 | Phase 5 | Pending |
 | REPO-04 | Phase 5 | Pending |
-| PLAN-01 | Phase 2 | Pending |
-| PLAN-02 | Phase 2 | Pending |
-| PLAN-03 | Phase 2 | Pending |
-| PLAN-04 | Phase 2 | Pending |
+| PLAN-01 | Phase 2 | Complete |
+| PLAN-02 | Phase 2 | Complete |
+| PLAN-03 | Phase 2 | Complete |
+| PLAN-04 | Phase 2 | Complete |
 | ASSIGN-01 | Phase 3 | Pending |
 | ASSIGN-02 | Phase 3 | Pending |
 | RISK-01 | Phase 3 | Pending |

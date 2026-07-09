@@ -14,7 +14,7 @@ A 2-day MVP delivered as five vertical slices. Phase 1 proves the riskiest plumb
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: Scaffolding + Thin End-to-End Slice** - Prove LangGraph interrupt/resume with durable checkpointing and a real ADO push, end to end, with a stubbed plan
-- [ ] **Phase 2: Config, Team & Greenfield Planning** - Connect ADO+GitHub, build the team roster, detect greenfield/brownfield, and generate a real epic→task plan from project docs
+- [x] **Phase 2: Config, Team & Greenfield Planning** - Connect ADO+GitHub, build the team roster, detect greenfield/brownfield, and generate a real epic→task plan from project docs (completed 2026-07-09)
 - [ ] **Phase 3: Skill/Load-Aware Assignment & Risk Scoring** - Auto-assign tasks against real team skill/load data and surface deterministic, explained risk scores
 - [ ] **Phase 4: Plan Editing — Direct & Chat with Diff Preview** - Let the lead edit the plan directly or via LLM chat, reviewing chat-driven changes as a diff before accepting
 - [ ] **Phase 5: Brownfield Codebase RAG & Onboarding Summary** - Ingest an existing codebase, embed it for RAG, and generate an onboarding summary that grounds planning
@@ -78,7 +78,7 @@ Plans:
 
 **Wave 3** *(depends on 02-03)*
 
-- [ ] 02-04-PLAN.md — Real GLM-backed plan generation replacing the stub: fixed skill taxonomy, hours estimates, bounded 2-5 epic/2-6 task plan, and a hand-rolled validate-then-repair retry loop (PLAN-01, PLAN-02, PLAN-03, PLAN-04)
+- [x] 02-04-PLAN.md — Real GLM-backed plan generation replacing the stub: fixed skill taxonomy, hours estimates, bounded 2-5 epic/2-6 task plan, and a hand-rolled validate-then-repair retry loop (PLAN-01, PLAN-02, PLAN-03, PLAN-04)
 
 **Cross-cutting constraints:**
 
@@ -139,7 +139,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Scaffolding + Thin End-to-End Slice | 2/3 | In Progress|  |
-| 2. Config, Team & Greenfield Planning | 3/4 | In Progress|  |
+| 2. Config, Team & Greenfield Planning | 4/4 | Complete   | 2026-07-09 |
 | 3. Skill/Load-Aware Assignment & Risk Scoring | 0/TBD | Not started | - |
 | 4. Plan Editing — Direct & Chat with Diff Preview | 0/TBD | Not started | - |
 | 5. Brownfield Codebase RAG & Onboarding Summary | 0/TBD | Not started | - |
