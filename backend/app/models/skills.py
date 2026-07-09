@@ -25,21 +25,27 @@ SKILL_TAXONOMY: list[str] = [
 ]
 
 
-def validate_skill_tags(plan) -> None:
-    """Raise ValueError listing every task whose skill_tag is outside SKILL_TAXONOMY.
+def validate_skill_tags(plan, skill_taxonomy: list[str] | None = None) -> None:
+    """Raise ValueError listing every task whose skill_tag is outside the taxonomy.
 
     Approach (b) from Pitfall 4 / Task 0's discretion: Task.skill_tag stays
     `str | None` on the shared model (avoiding invasiveness to
     push_to_ado.py/frontend consumers), and taxonomy compliance is enforced
     here as an explicit post-parse validation step called from
     services/llm.py's repair loop — exactly like a schema validation failure.
+
+    skill_taxonomy defaults to the canonical SKILL_TAXONOMY constant; callers
+    may pass an explicit list (e.g. services/llm.py threads the same list it
+    used to build the prompt) so the taxonomy checked against is always the
+    one the LLM was actually instructed to use.
     """
+    taxonomy = skill_taxonomy if skill_taxonomy is not None else SKILL_TAXONOMY
     violations: list[str] = []
     for epic in plan.epics:
         for task in epic.tasks:
-            if task.skill_tag is not None and task.skill_tag not in SKILL_TAXONOMY:
+            if task.skill_tag is not None and task.skill_tag not in taxonomy:
                 violations.append(f"task {task.id!r} has skill_tag {task.skill_tag!r}")
     if violations:
         raise ValueError(
-            "skill_tag values outside SKILL_TAXONOMY: " + "; ".join(violations)
+            "skill_tag values outside taxonomy: " + "; ".join(violations)
         )
