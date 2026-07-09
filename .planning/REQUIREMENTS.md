@@ -56,8 +56,8 @@ Requirements for the 2-day MVP. Each maps to a roadmap phase.
 
 ### Orchestration
 
-- [ ] **ORCH-01**: The greenfield/brownfield branch and the human review/edit loop are orchestrated with LangGraph using an interrupt-and-resume pattern
-- [ ] **ORCH-02**: Run state is checkpointed durably so an in-progress plan survives a backend restart
+- [x] **ORCH-01**: The greenfield/brownfield branch and the human review/edit loop are orchestrated with LangGraph using an interrupt-and-resume pattern
+- [x] **ORCH-02**: Run state is checkpointed durably so an in-progress plan survives a backend restart
 
 ## v2 Requirements
 
@@ -121,8 +121,8 @@ Explicitly excluded for this MVP. Documented to prevent scope creep.
 | PUSH-01 | Phase 1 | Pending |
 | PUSH-02 | Phase 1 | Pending |
 | PUSH-03 | Phase 1 | Pending |
-| ORCH-01 | Phase 1 | Pending |
-| ORCH-02 | Phase 1 | Pending |
+| ORCH-01 | Phase 1 | Complete |
+| ORCH-02 | Phase 1 | Complete |
 
 **Coverage:**
 - v1 requirements: 25 total

@@ -39,7 +39,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 Plans:
 **Wave 1**
 
-- [ ] 01-01-PLAN.md — Backend LangGraph spine (ingest_config -> stub_plan -> human_review -> push_to_ado stub) wired to FastAPI + AsyncSqliteSaver, proving interrupt/resume and restart survival (ORCH-01 partial, ORCH-02)
+- [x] 01-01-PLAN.md — Backend LangGraph spine (ingest_config -> stub_plan -> human_review -> push_to_ado stub) wired to FastAPI + AsyncSqliteSaver, proving interrupt/resume and restart survival (ORCH-01 partial, ORCH-02)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -118,7 +118,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Scaffolding + Thin End-to-End Slice | 0/TBD | Not started | - |
+| 1. Scaffolding + Thin End-to-End Slice | 1/3 | In Progress|  |
 | 2. Config, Team & Greenfield Planning | 0/TBD | Not started | - |
 | 3. Skill/Load-Aware Assignment & Risk Scoring | 0/TBD | Not started | - |
 | 4. Plan Editing — Direct & Chat with Diff Preview | 0/TBD | Not started | - |
