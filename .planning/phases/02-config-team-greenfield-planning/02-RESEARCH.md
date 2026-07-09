@@ -418,17 +418,17 @@ result = structured_llm.invoke(prompt_messages)
 
 **If this table is empty:** N/A — see entries above.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Does `_apis/tokens/pats?api-version=7.1-preview.1` actually succeed when called with the project's own ADO_PAT via Basic auth, in this specific org?**
+1. **(RESOLVED)** Does `_apis/tokens/pats?api-version=7.1-preview.1` actually succeed when called with the project's own ADO_PAT via Basic auth, in this specific org?
    - What we know: Microsoft's own reference docs for `Pats - List` state `Security: accessToken` type `basic`, implying PAT auth is accepted; separately, general community sourcing describes the wider "PAT Lifecycle Management" API family as intended for Entra-authenticated org-admin flows.
    - What's unclear: Whether this specific `tokens/pats` (not `tokenadmin/personalaccesstokens`) endpoint, called by a PAT for its own authorizations, actually returns 200 in practice, or 401/403.
-   - Recommendation: Treat as best-effort only (per Pitfall 1) — try it, and if it fails, don't block the smoke-test on it; the probe-based approach (Pitfall 2) already independently satisfies CONN-03's four required checks (auth validity via 203/401 detection, write scope via create-throwaway-item, project access via workitemtypes call) except for exact expiry date, which becomes "unknown, but the PAT works today" if this call fails.
+   - Resolution: Treated as best-effort only (per Pitfall 1) — Plan 02-01 tries it, and if it fails, does not block the smoke-test on it; the probe-based approach (Pitfall 2) already independently satisfies CONN-03's four required checks (auth validity via 203/401 detection, write scope via create-throwaway-item, project access via workitemtypes call) except for exact expiry date, which becomes "unknown, but the PAT works today" if this call fails. See `02-01-PLAN.md`.
 
-2. **Should the repair-retry loop vary its extraction `method` across attempts (e.g., attempt 1 = `function_calling`, attempt 2 = `json_mode`), or always retry the same method with a repair prompt appended?**
+2. **(RESOLVED)** Should the repair-retry loop vary its extraction `method` across attempts (e.g., attempt 1 = `function_calling`, attempt 2 = `json_mode`), or always retry the same method with a repair prompt appended?
    - What we know: Both methods exist in `langchain-openai`; `function_calling` is the safer default for a non-OpenAI endpoint (Alternatives Considered table); a same-method retry with an explicit error-repair prompt is the standard documented pattern (RetryWithErrorOutputParser-equivalent, hand-rolled).
    - What's unclear: Whether varying the method on retry meaningfully improves success odds against GLM/NIM specifically, versus just adding complexity — no source found tests this combination.
-   - Recommendation: Start with same-method + repair-prompt retry (simpler, matches Pattern 3's example) for the MVP; treat method-switching as a possible refinement only if empirical testing during Plan implementation shows the same-method retry doesn't recover from the documented malformed-JSON bug (Pitfall 3).
+   - Resolution: Plan 02-04 uses same-method + repair-prompt retry (simpler, matches Pattern 3's example) for the MVP; method-switching is deferred as a possible refinement only if empirical testing during implementation shows the same-method retry doesn't recover from the documented malformed-JSON bug (Pitfall 3). See `02-04-PLAN.md`.
 
 ## Environment Availability
 
