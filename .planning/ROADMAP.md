@@ -30,7 +30,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Restarting the backend mid-run does not lose the in-progress run; it resumes from its last checkpoint
   3. Approving the stubbed plan creates real Azure DevOps work items with correct epic→task parent/child hierarchy links
   4. Each pushed work item's creation and assignment is verified (not assumed) and any failure is surfaced, not silently swallowed
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Backend LangGraph spine (ingest_config -> stub_plan -> human_review -> push_to_ado stub) wired to FastAPI + AsyncSqliteSaver, proving interrupt/resume and restart survival (ORCH-01 partial, ORCH-02)
+- [ ] 01-02-PLAN.md — Script A ADO smoke test + real ado_client wired into push_to_ado, replacing the stub (PUSH-01, PUSH-02, PUSH-03); gated behind ADO org/project/PAT provisioning (D-11)
+- [ ] 01-03-PLAN.md — Minimal React + Vite page (Start/poll/Approve) wired to the Plan 01-01 backend routes (D-07/D-08)
 
 ### Phase 2: Config, Team & Greenfield Planning
 **Goal**: A lead can connect their real ADO project and GitHub repo, build a team roster, and get a real LLM-generated epic→task plan (skill-tagged, estimated) grounded in the repo's docs for the greenfield path — the primary demo flow.
