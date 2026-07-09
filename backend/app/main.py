@@ -14,9 +14,10 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 
-from app.db import run_metadata
+from app.db import run_metadata, team_roster
 from app.graph.build import build_graph
 from app.routers.runs import router as runs_router
+from app.routers.team import router as team_router
 
 load_dotenv()
 
@@ -25,6 +26,7 @@ load_dotenv()
 async def lifespan(app: FastAPI):
     db_path = os.environ.get("CHECKPOINT_DB_PATH", "./checkpoints.sqlite")
     run_metadata.init_db()
+    team_roster.init_team_table()
     async with AsyncSqliteSaver.from_conn_string(db_path) as checkpointer:
         await checkpointer.setup()
         graph = build_graph().compile(checkpointer=checkpointer)
@@ -35,3 +37,4 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 app.include_router(runs_router)
+app.include_router(team_router)
