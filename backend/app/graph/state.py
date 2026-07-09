@@ -15,3 +15,6 @@ class RunState(TypedDict, total=False):
     approved: bool
     pushed: bool
     push_report: PushReport
+    repo_mode: str  # "greenfield" | "brownfield" — D-08 manual toggle, defaults to greenfield
+    smoke_test_passed: bool  # CONN-03 blocking gate result, set by ingest_config
+    smoke_test: dict  # full per-check detail (project_access/write_scope/expiry), D-03
