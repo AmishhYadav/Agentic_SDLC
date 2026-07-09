@@ -52,7 +52,7 @@ Plans:
 
 ### Phase 2: Config, Team & Greenfield Planning
 
-**Goal**: A lead can connect their real ADO project and GitHub repo, build a team roster, and get a real LLM-generated epic→task plan (skill-tagged, estimated) grounded in the repo's docs for the greenfield path — the primary demo flow.
+**Goal**: As a lead, I want to connect my real ADO project and GitHub repo, build a team roster, and get a real LLM-generated epic→task plan (skill-tagged, estimated) grounded in the repo's docs for the greenfield path, so that I have the primary demo flow ready to review and push.
 **Mode:** mvp
 **Depends on**: Phase 1
 **Requirements**: CONN-01, CONN-02, CONN-03, TEAM-01, TEAM-02, REPO-01, REPO-02, PLAN-01, PLAN-02, PLAN-03, PLAN-04
@@ -64,7 +64,27 @@ Plans:
   4. Tool generates a real epic→task plan from the repo's docs, where every task has a skill tag (from a fixed taxonomy) and an hours/days estimate
   5. Malformed LLM plan output is caught by schema validation and repaired/retried automatically rather than surfacing broken data
 
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+**Wave 1**
+
+- [ ] 02-01-PLAN.md — Config/.env load + blocking ADO PAT smoke-test (project access, write scope, best-effort expiry) wired into ingest_config, with pytest scaffold (CONN-01, CONN-02, CONN-03)
+- [ ] 02-02-PLAN.md — Team roster CRUD: SQLite table, TeamMember model, FastAPI routes, minimal React page (TEAM-01, TEAM-02)
+
+**Wave 2** *(depends on 02-01)*
+
+- [ ] 02-03-PLAN.md — Greenfield GitHub doc fetch (tree enumeration + targeted README/docs/**/*.md content) and the real greenfield/brownfield conditional edge, gated behind the smoke-test result (REPO-01, REPO-02)
+
+**Wave 3** *(depends on 02-03)*
+
+- [ ] 02-04-PLAN.md — Real GLM-backed plan generation replacing the stub: fixed skill taxonomy, hours estimates, bounded 2-5 epic/2-6 task plan, and a hand-rolled validate-then-repair retry loop (PLAN-01, PLAN-02, PLAN-03, PLAN-04)
+
+**Cross-cutting constraints:**
+
+- A run whose ADO PAT smoke-test fails never reaches doc-fetching or plan generation (blocking gate, not a warning)
+- suggested_assignee stays empty ("") on every Phase 2-generated task — Phase 3 owns assignment
+- The brownfield leg is a guarded, honest placeholder ("arrives in Phase 5"), never a silent greenfield fallback
 
 ### Phase 3: Skill/Load-Aware Assignment & Risk Scoring
 
@@ -119,7 +139,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Scaffolding + Thin End-to-End Slice | 2/3 | In Progress|  |
-| 2. Config, Team & Greenfield Planning | 0/TBD | Not started | - |
+| 2. Config, Team & Greenfield Planning | 0/4 | Not started | - |
 | 3. Skill/Load-Aware Assignment & Risk Scoring | 0/TBD | Not started | - |
 | 4. Plan Editing — Direct & Chat with Diff Preview | 0/TBD | Not started | - |
 | 5. Brownfield Codebase RAG & Onboarding Summary | 0/TBD | Not started | - |
