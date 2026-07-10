@@ -11,8 +11,20 @@ function App() {
   const [activeTab, setActiveTab] = useState<"run" | "team">("run");
 
   return (
-    <div>
-      <nav className="tab-nav">
+    <div className="app">
+      <header className="app-header">
+        <div className="app-brand">
+          <span className="app-mark" aria-hidden="true" />
+          <span className="app-brand-text">
+            <span className="app-name">Project Planning &amp; Onboarding</span>
+            <span className="app-tagline">
+              Connect ADO + GitHub → skill-aware plan → assigned work items
+            </span>
+          </span>
+        </div>
+      </header>
+
+      <nav className="tab-nav" aria-label="Workflow steps">
         <button
           type="button"
           className={activeTab === "team" ? "tab-btn tab-btn-active" : "tab-btn"}
@@ -28,7 +40,10 @@ function App() {
           2. Run
         </button>
       </nav>
-      {activeTab === "run" ? <RunPage /> : <TeamPage />}
+
+      <main className="app-main">
+        {activeTab === "run" ? <RunPage /> : <TeamPage />}
+      </main>
     </div>
   );
 }
