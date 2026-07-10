@@ -24,9 +24,9 @@ def test_route_after_config_returns_blocked_regardless_of_repo_mode():
     assert route_after_config(state) == "blocked"
 
 
-def test_route_after_config_returns_brownfield_stub_when_passed_and_brownfield():
+def test_route_after_config_returns_ingest_brownfield_when_passed_and_brownfield():
     state = {"smoke_test_passed": True, "repo_mode": "brownfield"}
-    assert route_after_config(state) == "ingest_brownfield_stub"
+    assert route_after_config(state) == "ingest_brownfield"
 
 
 def test_route_after_config_returns_greenfield_when_passed_and_greenfield():
@@ -73,24 +73,39 @@ async def test_compiled_graph_reaches_read_docs_greenfield_for_greenfield_state(
 
 
 @pytest.mark.asyncio
-async def test_compiled_graph_reaches_ingest_brownfield_stub_for_brownfield_state(mock_ado_env, monkeypatch):
+async def test_compiled_graph_reaches_ingest_brownfield_for_brownfield_state(mock_ado_env, monkeypatch, tmp_path):
     monkeypatch.setenv("LEAD_EMAIL", "lead@example.com")
     monkeypatch.setenv("REPO_MODE", "brownfield")
+    # Force the offline embedding/LLM fallbacks so this stays hermetic.
+    monkeypatch.setenv("NVIDIA_API_KEY", "")
+    monkeypatch.delenv("NVIDIA_EMBED_MODEL", raising=False)
+    monkeypatch.setenv("GITHUB_REPO", "")
+
+    sample_file = tmp_path / "main.py"
+    sample_file.write_text("def main():\n    print('hello world')\n")
+    monkeypatch.setenv("BROWNFIELD_PATH", str(tmp_path))
 
     passing_result = {"passed": True, "checks": []}
+    from app.models.plan import Plan
 
-    with patch(
-        "app.graph.nodes.ingest_config.ado_client.run_smoke_test",
-        AsyncMock(return_value=passing_result),
+    with (
+        patch(
+            "app.graph.nodes.ingest_config.ado_client.run_smoke_test",
+            AsyncMock(return_value=passing_result),
+        ),
+        patch("app.graph.nodes.generate_plan.build_chat_llm", return_value=object()),
+        patch(
+            "app.graph.nodes.generate_plan.generate_plan_with_repair",
+            return_value=Plan(epics=[]),
+        ),
     ):
         graph = build_graph().compile(checkpointer=InMemorySaver())
         config = {"configurable": {"thread_id": "test-brownfield"}}
         result = await graph.ainvoke({}, config=config)
 
-    assert result["docs_text"] is None
-    assert result["blocked_reason"] == (
-        "Brownfield planning arrives in Phase 5 — this run cannot generate a plan yet."
-    )
+    assert result["blocked_reason"] is None
+    assert result["docs_text"]
+    assert result["onboarding_summary"]
 
 
 @pytest.mark.asyncio

@@ -1,15 +1,40 @@
-"""Stub push node — gated so it runs exactly once (Pattern 3).
+"""Real ADO push node — gated so it runs exactly once (Pattern 3).
 
-This is a DELIBERATE no-op stub for Phase 1: it returns a "not yet
-implemented" PushReport and sets pushed=True so the full graph compiles and
-runs end-to-end. Plan 01-02 REPLACES this function's body with the real ADO
-REST push implementation — the signature and the "check pushed first" gate
-must remain identical so 01-02 only changes the body, not the node's place in
-the graph.
+Wired to the real ado_client.push_plan implementation. The "check pushed
+first" gate and the "approved is not True" early-return are unchanged from
+the original stub — only the push body changed. With no/expired PAT,
+ado_client.push_plan returns create_failed items gracefully rather than
+raising — that is the intended honest behavior (D-09).
 """
 
 from app.graph.state import RunState
 from app.models.plan import PushReport, PushResultItem
+from app.services import ado_client
+
+_DEMO_SKIP_DETAIL = (
+    "ADO push skipped — running in DEMO_MODE (no valid PAT). "
+    "Add a valid ADO_PAT and set DEMO_MODE=false to push for real."
+)
+
+
+def _demo_skip_report(state: RunState) -> PushReport:
+    """Build an honest, per-item 'skipped' report without touching ADO.
+
+    Reuses the 'not_implemented' status (the only non-success terminal status
+    that isn't an actual API failure) so the frontend renders it unchanged;
+    the detail string carries the real reason.
+    """
+    plan = state["plan"]
+    items: list[PushResultItem] = []
+    for epic in plan.epics:
+        items.append(
+            PushResultItem(item_id=epic.id, status="not_implemented", detail=_DEMO_SKIP_DETAIL)
+        )
+        for task in epic.tasks:
+            items.append(
+                PushResultItem(item_id=task.id, status="not_implemented", detail=_DEMO_SKIP_DETAIL)
+            )
+    return PushReport(items=items, all_succeeded=False)
 
 
 async def push_to_ado(state: RunState) -> dict:
@@ -22,24 +47,10 @@ async def push_to_ado(state: RunState) -> dict:
             "pushed": False,
         }
 
-    plan = state["plan"]
-    items: list[PushResultItem] = []
-    for epic in plan.epics:
-        items.append(
-            PushResultItem(
-                item_id=epic.id,
-                status="not_implemented",
-                detail="push_to_ado not yet wired to real ADO client (see Plan 01-02)",
-            )
-        )
-        for task in epic.tasks:
-            items.append(
-                PushResultItem(
-                    item_id=task.id,
-                    status="not_implemented",
-                    detail="push_to_ado not yet wired to real ADO client (see Plan 01-02)",
-                )
-            )
+    # DEMO_MODE (or a run that only got past the smoke-test because of it):
+    # never hammer ADO with an invalid/expired PAT — report an honest skip.
+    if state.get("demo_mode") and state.get("smoke_test_passed") is not True:
+        return {"push_report": _demo_skip_report(state), "pushed": True}
 
-    report = PushReport(items=items, all_succeeded=False)
+    report = await ado_client.push_plan(state["plan"])
     return {"push_report": report, "pushed": True}

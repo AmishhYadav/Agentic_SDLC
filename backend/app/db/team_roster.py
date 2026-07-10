@@ -70,6 +70,18 @@ def list_members() -> list[TeamMember]:
     conn = sqlite3.connect(_db_path())
     try:
         conn.row_factory = sqlite3.Row
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS team_members (
+                id TEXT PRIMARY KEY,
+                name TEXT,
+                email TEXT,
+                designation TEXT,
+                skills TEXT,
+                experience_level TEXT
+            )
+            """
+        )
         cur = conn.execute(
             "SELECT id, name, email, designation, skills, experience_level FROM team_members"
         )

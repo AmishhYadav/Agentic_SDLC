@@ -45,11 +45,56 @@ export interface PushReport {
   all_succeeded: boolean;
 }
 
+export interface RiskItem {
+  skill: string;
+  hours_at_risk: number;
+  severity: "low" | "medium" | "high";
+  detail: string;
+}
+
+export interface RiskReport {
+  score: number;
+  level: "low" | "medium" | "high";
+  items: RiskItem[];
+  narrative: string;
+}
+
+export interface SmokeTestCheck {
+  check: string;
+  passed: boolean;
+  reason: string | null;
+}
+
+export interface SmokeTest {
+  passed: boolean;
+  checks: SmokeTestCheck[];
+}
+
 export interface RunResponse {
   run_id: string;
-  status: "running" | "awaiting_review" | "completed" | "not_found";
+  status:
+    | "running"
+    | "awaiting_review"
+    | "completed"
+    | "not_found"
+    | "blocked_smoke_test_failed";
   plan: Plan | null;
   push_report: PushReport | null;
+  smoke_test: SmokeTest | null;
+  smoke_test_passed: boolean | null;
+  repo_mode: string | null;
+  risk: RiskReport | null;
+  team_count: number | null;
+  onboarding_summary: string | null;
+  demo_mode: boolean | null;
+}
+
+export interface EditResponse {
+  current_plan: Plan;
+  proposed_plan: Plan;
+  diff: string;
+  note: string;
+  risk: RiskReport;
 }
 
 async function parseRunResponse(res: Response): Promise<RunResponse> {
@@ -57,6 +102,13 @@ async function parseRunResponse(res: Response): Promise<RunResponse> {
     throw new Error(`Request failed with status ${res.status}`);
   }
   return (await res.json()) as RunResponse;
+}
+
+async function parseEditResponse(res: Response): Promise<EditResponse> {
+  if (!res.ok) {
+    throw new Error(`Request failed with status ${res.status}`);
+  }
+  return (await res.json()) as EditResponse;
 }
 
 export async function startRun(): Promise<RunResponse> {
@@ -77,6 +129,30 @@ export async function approveRun(runId: string): Promise<RunResponse> {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ approved: true }),
+  });
+  return parseRunResponse(res);
+}
+
+export async function editPlan(
+  runId: string,
+  instruction: string,
+): Promise<EditResponse> {
+  const res = await fetch(`/runs/${runId}/edit`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ instruction }),
+  });
+  return parseEditResponse(res);
+}
+
+export async function applyPlan(
+  runId: string,
+  plan: Plan,
+): Promise<RunResponse> {
+  const res = await fetch(`/runs/${runId}/apply`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ plan }),
   });
   return parseRunResponse(res);
 }

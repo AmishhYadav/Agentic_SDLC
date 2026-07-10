@@ -19,15 +19,35 @@ from app.graph.state import RunState
 from app.services import ado_client
 
 
+def _demo_mode_enabled() -> bool:
+    """DEMO_MODE lets the run proceed through planning even when the ADO PAT
+    smoke-test fails (no/expired PAT), so the plan/assign/risk/edit loop is
+    demoable without a live PAT. The real ADO push is skipped in this mode.
+
+    Enabled when DEMO_MODE is truthy in .env, OR auto-enabled when ADO_PAT is
+    absent/empty (so the tool "just works" before a PAT is provisioned). Set
+    DEMO_MODE=false and provide a valid ADO_PAT to restore real blocking + push.
+    """
+    flag = os.environ.get("DEMO_MODE", "").strip().lower()
+    if flag in ("1", "true", "yes", "on"):
+        return True
+    if flag in ("0", "false", "no", "off"):
+        return False
+    # Unset: auto-enable only when there is no PAT to try at all.
+    return not os.environ.get("ADO_PAT", "").strip()
+
+
 async def ingest_config(state: RunState) -> dict:
     lead_email = os.environ.get("LEAD_EMAIL", "")
     repo_mode = os.environ.get("REPO_MODE") or "greenfield"
+    demo_mode = _demo_mode_enabled()
 
     smoke_test = await ado_client.run_smoke_test(lead_email)
 
     return {
         "lead_email": lead_email,
         "repo_mode": repo_mode,
+        "demo_mode": demo_mode,
         "smoke_test_passed": smoke_test["passed"],
         "smoke_test": smoke_test,
     }

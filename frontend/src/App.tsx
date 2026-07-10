@@ -12,12 +12,20 @@ function App() {
 
   return (
     <div>
-      <nav>
-        <button type="button" onClick={() => setActiveTab("run")}>
-          Run
+      <nav className="tab-nav">
+        <button
+          type="button"
+          className={activeTab === "team" ? "tab-btn tab-btn-active" : "tab-btn"}
+          onClick={() => setActiveTab("team")}
+        >
+          1. Team
         </button>
-        <button type="button" onClick={() => setActiveTab("team")}>
-          Team
+        <button
+          type="button"
+          className={activeTab === "run" ? "tab-btn tab-btn-active" : "tab-btn"}
+          onClick={() => setActiveTab("run")}
+        >
+          2. Run
         </button>
       </nav>
       {activeTab === "run" ? <RunPage /> : <TeamPage />}

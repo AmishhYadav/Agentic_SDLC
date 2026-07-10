@@ -90,74 +90,100 @@ export default function TeamPage() {
   }
 
   return (
-    <div>
-      <h1>Team Roster</h1>
+    <div className="page">
+      <h1>Team</h1>
+      <p className="step-hint">
+        Step 1 of 2 — add your team members here so the plan generated on the
+        Run tab can auto-assign skill-tagged tasks to real people.
+      </p>
 
-      {error && <p>Error: {error}</p>}
+      {error && <p className="error-text">Error: {error}</p>}
 
-      <div>
+      <section className="card">
         <h2>{editingId ? "Edit member" : "Add member"}</h2>
-        <input
-          placeholder="Name"
-          value={form.name}
-          onChange={(e) => updateFormField("name", e.target.value)}
-        />
-        <input
-          placeholder="Email"
-          value={form.email}
-          onChange={(e) => updateFormField("email", e.target.value)}
-        />
-        <input
-          placeholder="Designation"
-          value={form.designation}
-          onChange={(e) => updateFormField("designation", e.target.value)}
-        />
-        <input
-          placeholder="Skills"
-          value={form.skills}
-          onChange={(e) => updateFormField("skills", e.target.value)}
-        />
-        <select
-          value={form.experience_level}
-          onChange={(e) =>
-            updateFormField(
-              "experience_level",
-              e.target.value as FormState["experience_level"],
-            )
-          }
-        >
-          <option value="junior">junior</option>
-          <option value="mid">mid</option>
-          <option value="senior">senior</option>
-          <option value="lead">lead</option>
-        </select>
-        <button type="button" onClick={handleAddOrSave}>
-          {editingId ? "Save" : "Add"}
-        </button>
-        {editingId && (
-          <button type="button" onClick={handleCancelEdit}>
-            Cancel
+        <div className="form-grid">
+          <input
+            className="text-input"
+            placeholder="Name"
+            value={form.name}
+            onChange={(e) => updateFormField("name", e.target.value)}
+          />
+          <input
+            className="text-input"
+            placeholder="Email"
+            value={form.email}
+            onChange={(e) => updateFormField("email", e.target.value)}
+          />
+          <input
+            className="text-input"
+            placeholder="Designation"
+            value={form.designation}
+            onChange={(e) => updateFormField("designation", e.target.value)}
+          />
+          <input
+            className="text-input"
+            placeholder="Skills"
+            value={form.skills}
+            onChange={(e) => updateFormField("skills", e.target.value)}
+          />
+          <select
+            className="text-input"
+            value={form.experience_level}
+            onChange={(e) =>
+              updateFormField(
+                "experience_level",
+                e.target.value as FormState["experience_level"],
+              )
+            }
+          >
+            <option value="junior">junior</option>
+            <option value="mid">mid</option>
+            <option value="senior">senior</option>
+            <option value="lead">lead</option>
+          </select>
+        </div>
+        <div className="row">
+          <button type="button" className="btn btn-primary" onClick={handleAddOrSave}>
+            {editingId ? "Save" : "Add"}
           </button>
-        )}
-      </div>
+          {editingId && (
+            <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>
+              Cancel
+            </button>
+          )}
+        </div>
+      </section>
 
-      <div>
-        <h2>Members</h2>
-        <ul>
+      <section className="card">
+        <h2>Members ({members.length})</h2>
+        {members.length === 0 && <p className="muted">No team members yet.</p>}
+        <ul className="member-list">
           {members.map((member) => (
-            <li key={member.id}>
-              {member.name} — {member.email} — {member.designation} —{" "}
-              {member.skills} — {member.experience_level}{" "}
-              <button type="button" onClick={() => handleEdit(member)}>
-                Edit
-              </button>
-              <button type="button" onClick={() => handleRemove(member.id)}>
-                Remove
-              </button>
+            <li key={member.id} className="member-card">
+              <div>
+                <strong>{member.name}</strong>{" "}
+                <span className="tag">{member.experience_level}</span>
+                <div className="muted">
+                  {member.email} · {member.designation}
+                </div>
+                <div className="muted">{member.skills}</div>
+              </div>
+              <div className="row">
+                <button type="button" className="btn" onClick={() => handleEdit(member)}>
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => handleRemove(member.id)}
+                >
+                  Remove
+                </button>
+              </div>
             </li>
           ))}
         </ul>
-      </div>
+      </section>
     </div>
   );
 }

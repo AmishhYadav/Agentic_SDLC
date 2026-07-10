@@ -24,6 +24,16 @@ from app.models.skills import validate_skill_tags
 _NIM_BASE_URL = "https://integrate.api.nvidia.com/v1"
 
 
+def llm_available() -> bool:
+    """True iff NVIDIA_API_KEY is set and non-empty in the environment.
+
+    Used by generate_plan (the graph node) to decide whether to call the
+    real GLM-via-NVIDIA-NIM path or fall back to the deterministic offline
+    planner — so the demo works end-to-end with zero API keys configured.
+    """
+    return bool(os.environ.get("NVIDIA_API_KEY", "").strip())
+
+
 def build_chat_llm() -> ChatOpenAI:
     """Construct a ChatOpenAI client pointed at NVIDIA NIM's OpenAI-compatible endpoint.
 
