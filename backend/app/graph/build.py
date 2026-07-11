@@ -18,6 +18,7 @@ in the real repo exactly like read_docs_greenfield does for greenfield.
 from langgraph.graph import END, START, StateGraph
 
 from app.graph.nodes.assign_and_score import assign_and_score
+from app.graph.nodes.compose_plan_document import compose_plan_document
 from app.graph.nodes.generate_plan import generate_plan
 from app.graph.nodes.human_review import human_review
 from app.graph.nodes.ingest_brownfield import ingest_brownfield
@@ -54,6 +55,7 @@ def build_graph() -> StateGraph:
     builder.add_node("ingest_brownfield", ingest_brownfield)
     builder.add_node("generate_plan", generate_plan)
     builder.add_node("assign_and_score", assign_and_score)
+    builder.add_node("compose_plan_document", compose_plan_document)
     builder.add_node("human_review", human_review)
     builder.add_node("push_to_ado", push_to_ado)
 
@@ -70,7 +72,8 @@ def build_graph() -> StateGraph:
     builder.add_edge("read_docs_greenfield", "generate_plan")
     builder.add_edge("ingest_brownfield", "generate_plan")
     builder.add_edge("generate_plan", "assign_and_score")
-    builder.add_edge("assign_and_score", "human_review")
+    builder.add_edge("assign_and_score", "compose_plan_document")
+    builder.add_edge("compose_plan_document", "human_review")
     builder.add_edge("human_review", "push_to_ado")
     builder.add_edge("push_to_ado", END)
 

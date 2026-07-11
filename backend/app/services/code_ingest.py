@@ -84,6 +84,12 @@ def resolve_source_dir() -> tuple[str, bool]:
     return project_root, False
 
 
+def clone_repo(github_repo: str) -> str:
+    """Public entry point: shallow-clone `owner/repo` to a tempdir (caller cleans
+    up). Uses GITHUB_TOKEN from env for private repos. Raises on clone failure."""
+    return _clone_repo(github_repo)
+
+
 def _clone_repo(github_repo: str) -> str:
     import git
 

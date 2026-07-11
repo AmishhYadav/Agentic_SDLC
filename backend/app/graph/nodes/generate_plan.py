@@ -10,11 +10,35 @@ configured (llm_available()), or falls back to the deterministic offline
 planner when it isn't — so the demo works end-to-end with zero API keys.
 """
 
+import asyncio
+
 from app.graph.state import RunState
 from app.models.plan import Plan
 from app.models.skills import SKILL_TAXONOMY
-from app.services.llm import build_chat_llm, generate_plan_with_repair, llm_available
+from app.services.llm import (
+    build_chat_llm,
+    generate_plan_with_repair,
+    pipeline_llm_enabled,
+)
 from app.services.offline_planner import generate_plan_offline
+
+
+def _generate_plan_blocking(docs_text: str) -> Plan:
+    """Synchronous planner: LLM path with deterministic offline fallback.
+
+    Everything here is blocking (langchain's ``.invoke`` is a sync network call,
+    the offline planner is CPU-bound), so this is run off the event loop via
+    ``asyncio.to_thread`` — see generate_plan.
+    """
+    if pipeline_llm_enabled():
+        try:
+            llm = build_chat_llm()
+            return generate_plan_with_repair(llm, docs_text, SKILL_TAXONOMY)
+        except Exception:  # noqa: BLE001 — demo resilience: a live LLM failure
+            # (deprecated model id, transient NIM error, repair-loop exhaustion)
+            # must never abort the run — fall back to the deterministic planner.
+            return generate_plan_offline(docs_text, SKILL_TAXONOMY)
+    return generate_plan_offline(docs_text, SKILL_TAXONOMY)
 
 
 async def generate_plan(state: RunState) -> dict:
@@ -23,14 +47,10 @@ async def generate_plan(state: RunState) -> dict:
 
     docs_text = state.get("docs_text") or ""
 
-    if llm_available():
-        try:
-            llm = build_chat_llm()
-            plan = generate_plan_with_repair(llm, docs_text, SKILL_TAXONOMY)
-        except Exception:  # noqa: BLE001 — demo resilience: a live LLM failure
-            # (deprecated model id, transient NIM error, repair-loop exhaustion)
-            # must never abort the run — fall back to the deterministic planner.
-            plan = generate_plan_offline(docs_text, SKILL_TAXONOMY)
-    else:
-        plan = generate_plan_offline(docs_text, SKILL_TAXONOMY)
+    # The planner is fully synchronous (blocking LLM HTTP call / CPU-bound
+    # offline planner). Running it inline in this async node would pin the
+    # single event-loop thread — freezing every other request, including the
+    # client's own GET /runs polling, so the run *looks* hung. Offload it to a
+    # worker thread to keep the server responsive while planning runs.
+    plan = await asyncio.to_thread(_generate_plan_blocking, docs_text)
     return {"plan": plan}

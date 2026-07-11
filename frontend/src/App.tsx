@@ -1,4 +1,5 @@
 import { useState } from "react";
+import CodebasePage from "./pages/CodebasePage";
 import RunPage from "./pages/RunPage";
 import TeamPage from "./pages/TeamPage";
 
@@ -8,13 +9,48 @@ import TeamPage from "./pages/TeamPage";
  * sufficient for a 2-day MVP with two pages.
  */
 function App() {
-  const [activeTab, setActiveTab] = useState<"run" | "team">("run");
+  const [activeTab, setActiveTab] = useState<"run" | "team" | "codebase">(
+    "team",
+  );
 
   return (
     <div className="app">
       <header className="app-header">
         <div className="app-brand">
-          <span className="app-mark" aria-hidden="true" />
+          <svg
+            className="app-mark"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <g fill="currentColor">
+              <rect x="10.7" y="1" width="2.6" height="22" rx="1.3" />
+              <rect
+                x="10.7"
+                y="1"
+                width="2.6"
+                height="22"
+                rx="1.3"
+                transform="rotate(45 12 12)"
+              />
+              <rect
+                x="10.7"
+                y="1"
+                width="2.6"
+                height="22"
+                rx="1.3"
+                transform="rotate(90 12 12)"
+              />
+              <rect
+                x="10.7"
+                y="1"
+                width="2.6"
+                height="22"
+                rx="1.3"
+                transform="rotate(135 12 12)"
+              />
+            </g>
+          </svg>
           <span className="app-brand-text">
             <span className="app-name">Project Planning &amp; Onboarding</span>
             <span className="app-tagline">
@@ -39,10 +75,21 @@ function App() {
         >
           2. Run
         </button>
+        <button
+          type="button"
+          className={
+            activeTab === "codebase" ? "tab-btn tab-btn-active" : "tab-btn"
+          }
+          onClick={() => setActiveTab("codebase")}
+        >
+          3. Ask codebase
+        </button>
       </nav>
 
       <main className="app-main">
-        {activeTab === "run" ? <RunPage /> : <TeamPage />}
+        {activeTab === "run" && <RunPage />}
+        {activeTab === "team" && <TeamPage />}
+        {activeTab === "codebase" && <CodebasePage />}
       </main>
     </div>
   );

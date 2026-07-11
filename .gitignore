@@ -1,9 +1,26 @@
+# Secrets — never commit
 .env
+**/.env
+!**/.env.example
+
+# Python
 backend/.venv/
 backend/__pycache__/
 **/__pycache__/
 *.pyc
+
+# Local databases / LangGraph checkpointer (incl. SQLite WAL sidecars)
 backend/*.sqlite
 backend/*.sqlite-journal
+backend/*.sqlite-shm
+backend/*.sqlite-wal
+
+# Generated codebase RAG index (rebuild with scripts/build_codebase_index.py)
+backend/codebase_index/
+
+# Frontend
 frontend/node_modules/
 frontend/dist/
+
+# OS / editor
+.DS_Store

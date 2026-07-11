@@ -20,10 +20,19 @@ logger = logging.getLogger(__name__)
 from app.db import team_roster
 from app.db.run_metadata import create_run_record
 from app.models.plan import Plan, PushReport
+from app.services.plan_document import render_plan_document_offline
 from app.services.plan_edit import apply_instruction, diff_plans
 from app.services.risk import compute_risk
 
 router = APIRouter()
+
+# Records background-run crashes — i.e. the graph task dying outside any node's
+# own error handling (a bug, a network error nothing caught, etc.). Without
+# this, GET /runs keeps reporting a dead run as "running" forever, which also
+# leaves the frontend's Start Run button permanently disabled. Keyed by run_id
+# (always a fresh uuid, so no collisions); in-memory is fine for a single-lead
+# local MVP — a process restart clears it, which is correct.
+_RUN_ERRORS: dict[str, str] = {}
 
 
 class ResumeRequest(BaseModel):
@@ -68,6 +77,36 @@ async def _derive_status(graph, run_id: str) -> dict:
             "team_count": 0,
             "demo_mode": False,
             "onboarding_summary": None,
+            "plan_document": None,
+            "current_stage": None,
+        }
+
+    # The node the background graph is about to run (or is paused inside) — the
+    # single honest signal for "what's happening right now". Empty once the run
+    # has settled (completed / blocked at END). The client maps this raw node
+    # name to a friendly pipeline-progress label.
+    next_nodes = tuple(getattr(snapshot, "next", None) or ())
+    current_stage = next_nodes[0] if next_nodes else None
+
+    # If the background task crashed, surface it as a terminal "failed" status
+    # rather than letting the client poll a dead run as "running" forever.
+    run_error = _RUN_ERRORS.get(run_id)
+    if run_error is not None and snapshot.values.get("pushed") is not True:
+        return {
+            "run_id": run_id,
+            "status": "failed",
+            "plan": snapshot.values.get("plan"),
+            "push_report": None,
+            "smoke_test": snapshot.values.get("smoke_test"),
+            "smoke_test_passed": snapshot.values.get("smoke_test_passed"),
+            "repo_mode": snapshot.values.get("repo_mode"),
+            "risk": snapshot.values.get("risk"),
+            "team_count": snapshot.values.get("team_count"),
+            "demo_mode": snapshot.values.get("demo_mode", False),
+            "onboarding_summary": snapshot.values.get("onboarding_summary"),
+            "plan_document": snapshot.values.get("plan_document"),
+            "current_stage": current_stage,
+            "error": run_error,
         }
 
     smoke_test = snapshot.values.get("smoke_test")
@@ -77,6 +116,7 @@ async def _derive_status(graph, run_id: str) -> dict:
     team_count = snapshot.values.get("team_count")
     demo_mode = snapshot.values.get("demo_mode", False)
     onboarding_summary = snapshot.values.get("onboarding_summary")
+    plan_document = snapshot.values.get("plan_document")
 
     # A failed smoke-test blocks the run — UNLESS DEMO_MODE let it proceed to
     # planning without a valid PAT (the loop stays demoable; push is skipped).
@@ -93,6 +133,8 @@ async def _derive_status(graph, run_id: str) -> dict:
             "team_count": team_count,
             "demo_mode": demo_mode,
             "onboarding_summary": onboarding_summary,
+            "plan_document": plan_document,
+            "current_stage": current_stage,
         }
 
     # A genuine human-review pause is an active INTERRUPT at human_review — not
@@ -119,6 +161,8 @@ async def _derive_status(graph, run_id: str) -> dict:
             "team_count": team_count,
             "demo_mode": demo_mode,
             "onboarding_summary": onboarding_summary,
+            "plan_document": plan_document,
+            "current_stage": current_stage,
         }
 
     if snapshot.values.get("pushed") is True:
@@ -135,6 +179,8 @@ async def _derive_status(graph, run_id: str) -> dict:
             "team_count": team_count,
             "demo_mode": demo_mode,
             "onboarding_summary": onboarding_summary,
+            "plan_document": plan_document,
+            "current_stage": current_stage,
         }
 
     # snapshot.next truthy but not interrupted -> the background graph is still
@@ -153,6 +199,8 @@ async def _derive_status(graph, run_id: str) -> dict:
         "team_count": team_count,
         "demo_mode": demo_mode,
         "onboarding_summary": onboarding_summary,
+        "plan_document": plan_document,
+        "current_stage": current_stage,
     }
 
 
@@ -172,8 +220,9 @@ async def start_run(request: Request):
     async def _run() -> None:
         try:
             await graph.ainvoke({"run_id": run_id}, config)
-        except Exception:  # noqa: BLE001 — a run failure must not kill the task silently
+        except Exception as exc:  # noqa: BLE001 — a run failure must not kill the task silently
             logger.exception("run %s failed during graph invocation", run_id)
+            _RUN_ERRORS[run_id] = f"{type(exc).__name__}: {exc}"
 
     asyncio.create_task(_run())
 
@@ -246,6 +295,11 @@ async def apply_run(run_id: str, body: ApplyRequest, request: Request):
 
     team = team_roster.list_members()
     risk = compute_risk(body.plan, team)
+    # Refresh the plan document (deterministic render — no LLM call in this
+    # synchronous request path) so it stays consistent with the edited plan.
+    plan_document = render_plan_document_offline(body.plan, risk, team)
 
-    await graph.aupdate_state(config, {"plan": body.plan, "risk": risk})
+    await graph.aupdate_state(
+        config, {"plan": body.plan, "risk": risk, "plan_document": plan_document}
+    )
     return await _derive_status(graph, run_id)

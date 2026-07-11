@@ -63,6 +63,8 @@ def _embed_via_nim(texts: list[str], input_type: str) -> list[list[float]]:
     client = OpenAI(
         api_key=os.environ["NVIDIA_API_KEY"],
         base_url=_NIM_BASE_URL,
+        timeout=30,
+        max_retries=1,
     )
     model = os.environ["NVIDIA_EMBED_MODEL"]
 
@@ -95,3 +97,22 @@ def embed_texts(texts: list[str], input_type: str = "passage") -> list[list[floa
             pass
 
     return [_local_embed(text) for text in texts]
+
+
+def embed_texts_local(texts: list[str]) -> list[list[float]]:
+    """Force the deterministic local embedding, no network. Public wrapper."""
+    return [_local_embed(text) for text in texts]
+
+
+def embed_with(
+    provider: str, texts: list[str], input_type: str = "passage"
+) -> list[list[float]]:
+    """Embed with a SPECIFIC provider — strict, so index and queries stay in the
+    same vector space. "local" never touches the network; "nim" raises on any
+    failure (no silent local fallback, which would mismatch a NIM-built index).
+    """
+    if not texts:
+        return []
+    if provider == "nim":
+        return _embed_via_nim(texts, input_type)
+    return embed_texts_local(texts)

@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import DiffView from "../components/DiffView";
 import {
   applyPlan,
@@ -24,6 +26,133 @@ const EXAMPLE_INSTRUCTIONS = [
   "change estimate of <task> to 8",
   "remove <task>",
 ];
+
+// The fixed pipeline the graph walks (build.py): connect → read repo →
+// generate → assign/score → human review → push. The two repo-ingestion nodes
+// (greenfield/brownfield) are collapsed into one "read repo" row since only one
+// ever runs per repo_mode.
+type StageState =
+  | "done"
+  | "active"
+  | "awaiting"
+  | "pending"
+  | "failed"
+  | "skipped";
+
+interface StageDef {
+  key: string;
+  label: string;
+  hint: string;
+}
+
+const PIPELINE_STAGES: StageDef[] = [
+  {
+    key: "ingest_config",
+    label: "Connect ADO & GitHub",
+    hint: "Verify the ADO PAT (smoke test) and load repo settings",
+  },
+  {
+    key: "read_repo",
+    label: "Read the repository",
+    hint: "Greenfield reads the docs; brownfield indexes the codebase for RAG",
+  },
+  {
+    key: "generate_plan",
+    label: "Generate the plan (AI)",
+    hint: "Draft epics → skill-tagged, estimated tasks",
+  },
+  {
+    key: "assign_and_score",
+    label: "Assign & score risk",
+    hint: "Load-balance tasks across the team and compute the risk score",
+  },
+  {
+    key: "compose_plan_document",
+    label: "Compose plan document",
+    hint: "Write the professional, detailed implementation plan document",
+  },
+  {
+    key: "human_review",
+    label: "Your review",
+    hint: "Pause so you can edit and approve before anything is pushed",
+  },
+  {
+    key: "push_to_ado",
+    label: "Push to Azure DevOps",
+    hint: "Create assigned work items (simulated in demo mode)",
+  },
+];
+
+const HUMAN_REVIEW_IDX = PIPELINE_STAGES.findIndex(
+  (s) => s.key === "human_review",
+);
+
+const STAGE_ICONS: Record<StageState, string> = {
+  done: "✓",
+  active: "●",
+  awaiting: "▶",
+  pending: "○",
+  failed: "✗",
+  skipped: "–",
+};
+
+function normalizeStage(stage: string | null): string | null {
+  if (stage === "read_docs_greenfield" || stage === "ingest_brownfield") {
+    return "read_repo";
+  }
+  return stage;
+}
+
+// Map the run's overall status + the backend's current_stage (the node the
+// graph is about to run / paused inside) onto a per-row state for the checklist.
+function computeStageStates(
+  status: UiStatus,
+  currentStage: string | null,
+): StageState[] {
+  const activeKey = normalizeStage(currentStage);
+  const activeIdx = activeKey
+    ? PIPELINE_STAGES.findIndex((s) => s.key === activeKey)
+    : -1;
+
+  return PIPELINE_STAGES.map((_, idx) => {
+    if (status === "blocked_smoke_test_failed") {
+      return idx === 0 ? "failed" : "skipped";
+    }
+    if (status === "failed") {
+      // The run crashed at activeIdx (the node it was about to run / inside).
+      if (activeIdx === -1) return idx === 0 ? "failed" : "skipped";
+      if (idx < activeIdx) return "done";
+      if (idx === activeIdx) return "failed";
+      return "skipped";
+    }
+    if (status === "completed") return "done";
+    if (status === "awaiting_review") {
+      if (idx < HUMAN_REVIEW_IDX) return "done";
+      if (idx === HUMAN_REVIEW_IDX) return "awaiting";
+      return "pending";
+    }
+    // status === "running" (or transient): lean on current_stage.
+    if (activeIdx === -1) return "pending";
+    if (idx < activeIdx) return "done";
+    if (idx === activeIdx) return "active";
+    return "pending";
+  });
+}
+
+function stageStatusLabel(state: StageState): string | null {
+  switch (state) {
+    case "active":
+      return " — in progress…";
+    case "awaiting":
+      return " — waiting for you";
+    case "done":
+      return " — done";
+    case "failed":
+      return " — failed";
+    default:
+      return null;
+  }
+}
 
 function riskBadgeClass(level: RiskReport["level"] | undefined): string {
   switch (level) {
@@ -83,8 +212,10 @@ export default function RunPage() {
   const [risk, setRisk] = useState<RiskReport | null>(null);
   const [teamCount, setTeamCount] = useState<number | null>(null);
   const [onboardingSummary, setOnboardingSummary] = useState<string | null>(null);
+  const [planDocument, setPlanDocument] = useState<string | null>(null);
   const [demoMode, setDemoMode] = useState<boolean | null>(null);
   const [smokeTestPassed, setSmokeTestPassed] = useState<boolean | null>(null);
+  const [currentStage, setCurrentStage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const [instruction, setInstruction] = useState("");
@@ -104,8 +235,36 @@ export default function RunPage() {
     setRisk(res.risk);
     setTeamCount(res.team_count);
     setOnboardingSummary(res.onboarding_summary);
+    setPlanDocument(res.plan_document);
     setDemoMode(res.demo_mode);
     setSmokeTestPassed(res.smoke_test_passed);
+    setCurrentStage(res.current_stage);
+    if (res.status === "failed" && res.error) {
+      setError(res.error);
+    }
+  }
+
+  // Abandon the current run and return to a clean slate — the escape hatch for
+  // a run that crashed or got stuck (so the disabled Start Run button, gated on
+  // an in-flight run, doesn't trap the lead on a dead run).
+  function handleReset() {
+    stopPolling();
+    setRunId(null);
+    setStatus("idle");
+    setPlan(null);
+    setPushReport(null);
+    setSmokeTest(null);
+    setRepoMode(null);
+    setRisk(null);
+    setTeamCount(null);
+    setOnboardingSummary(null);
+    setPlanDocument(null);
+    setDemoMode(null);
+    setSmokeTestPassed(null);
+    setCurrentStage(null);
+    setProposal(null);
+    setInstruction("");
+    setError(null);
   }
 
   function stopPolling() {
@@ -198,8 +357,22 @@ export default function RunPage() {
     setProposal(null);
   }
 
+  function handleDownloadDocument() {
+    if (!planDocument) return;
+    const blob = new Blob([planDocument], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "implementation-plan.md";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   const isRunInProgress = status === "running" || status === "awaiting_review";
   const isBlocked = status === "blocked_smoke_test_failed";
+  const stageStates = computeStageStates(status, currentStage);
 
   return (
     <div className="page">
@@ -211,7 +384,20 @@ export default function RunPage() {
 
       <section className="card">
         <h2>Connection &amp; status</h2>
-        {error && <p className="error-text">Error: {error}</p>}
+        {error && status !== "failed" && (
+          <p className="error-text">Error: {error}</p>
+        )}
+
+        {status === "idle" && (
+          <p className="muted small-caption">
+            <strong>Start Run</strong> kicks off the pipeline below — connect →
+            read repo → generate plan → assign &amp; score risk → pause for your
+            review → push to ADO. It runs in the background and this panel
+            updates live, so you can watch each step. Without a valid ADO PAT
+            (demo mode) the plan is still generated end-to-end; only the final
+            push to Azure DevOps is simulated — nothing is written to ADO.
+          </p>
+        )}
 
         <div className="row">
           <button
@@ -222,10 +408,30 @@ export default function RunPage() {
           >
             {isRunInProgress ? "Run in progress…" : "Start Run"}
           </button>
+          {runId && (
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={handleReset}
+            >
+              Start over
+            </button>
+          )}
           <span className="status-text">
             Status: <strong>{status}</strong>
           </span>
         </div>
+
+        {status === "failed" && (
+          <div className="banner banner-danger">
+            <strong>Run failed.</strong>
+            <p>
+              The run stopped unexpectedly{error ? `: ${error}` : "."} Click{" "}
+              <strong>Start over</strong>, then <strong>Start Run</strong> to try
+              again.
+            </p>
+          </div>
+        )}
 
         {runId && (
           <div className="meta-row">
@@ -233,6 +439,35 @@ export default function RunPage() {
             {teamCount !== null && (
               <span className="tag">team size: {teamCount}</span>
             )}
+          </div>
+        )}
+
+        {runId && (
+          <div className="pipeline">
+            <h3>What's happening</h3>
+            <ol className="pipeline-steps">
+              {PIPELINE_STAGES.map((stage, idx) => {
+                const state = stageStates[idx];
+                const note = stageStatusLabel(state);
+                return (
+                  <li
+                    key={stage.key}
+                    className={`pipeline-step pipeline-step-${state}`}
+                  >
+                    <span className="pipeline-icon" aria-hidden="true">
+                      {STAGE_ICONS[state]}
+                    </span>
+                    <span className="pipeline-body">
+                      <span className="pipeline-label">
+                        {stage.label}
+                        {note && <span className="pipeline-note">{note}</span>}
+                      </span>
+                      <span className="pipeline-hint">{stage.hint}</span>
+                    </span>
+                  </li>
+                );
+              })}
+            </ol>
           </div>
         )}
 
@@ -326,6 +561,29 @@ export default function RunPage() {
               </ul>
             </div>
           ))}
+        </section>
+      )}
+
+      {!isBlocked && planDocument && (
+        <section className="card">
+          <div className="doc-header">
+            <h2>Implementation plan document</h2>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={handleDownloadDocument}
+            >
+              Download .md
+            </button>
+          </div>
+          <p className="muted small-caption">
+            AI-generated — verify before relying on this.
+          </p>
+          <div className="markdown-body">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {planDocument}
+            </ReactMarkdown>
+          </div>
         </section>
       )}
 

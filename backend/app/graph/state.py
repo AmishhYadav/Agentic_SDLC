@@ -21,6 +21,7 @@ class RunState(TypedDict, total=False):
     smoke_test: dict  # full per-check detail (project_access/write_scope/expiry), D-03
     docs_text: str | None  # concatenated README + docs/**/*.md text (greenfield), or None
     onboarding_summary: str | None  # brownfield RAG-grounded onboarding summary (Phase 5), or None
+    plan_document: str | None  # professional markdown plan doc rendered from the plan JSON, or None
     blocked_reason: str | None  # D-12 no-docs / D-09 brownfield-placeholder message, or None
     risk: RiskReport  # deterministic risk score/narrative, set by assign_and_score
     team_count: int  # len(team_roster.list_members()) at assign_and_score time

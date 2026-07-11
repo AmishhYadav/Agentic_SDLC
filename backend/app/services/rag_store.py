@@ -6,7 +6,13 @@ infrastructure (matches the 2-day-MVP "least infrastructure" stance used
 elsewhere in this codebase, e.g. InMemorySaver for the graph checkpointer).
 """
 
+import json
+import os
+
 import numpy as np
+
+_VECTORS_FILE = "vectors.npy"
+_CHUNKS_FILE = "chunks.json"
 
 
 class RagStore:
@@ -53,6 +59,33 @@ class RagStore:
 
     def __len__(self) -> int:
         return len(self._chunks)
+
+    def save(self, dir_path: str) -> None:
+        """Persist the (already L2-normalized) vectors + chunk metadata to disk.
+
+        Two files under dir_path: vectors.npy (float matrix) + chunks.json.
+        Lets the codebase index be pre-computed once and reloaded at startup
+        instead of re-embedding the whole repo on every run/query.
+        """
+        os.makedirs(dir_path, exist_ok=True)
+        matrix = self._vectors if self._vectors is not None else np.zeros((0, 0))
+        np.save(os.path.join(dir_path, _VECTORS_FILE), matrix)
+        with open(os.path.join(dir_path, _CHUNKS_FILE), "w", encoding="utf-8") as fh:
+            json.dump(self._chunks, fh)
+
+    @classmethod
+    def load(cls, dir_path: str) -> "RagStore":
+        """Reconstruct a store previously written by save(). Vectors are already
+        normalized on disk, so query() (which normalizes only the query) works
+        unchanged."""
+        store = cls()
+        vectors = np.load(os.path.join(dir_path, _VECTORS_FILE))
+        with open(os.path.join(dir_path, _CHUNKS_FILE), encoding="utf-8") as fh:
+            chunks = json.load(fh)
+        if vectors.size and chunks:
+            store._vectors = vectors
+            store._chunks = chunks
+        return store
 
 
 def build_store_from_dir(root: str) -> tuple[RagStore, dict]:

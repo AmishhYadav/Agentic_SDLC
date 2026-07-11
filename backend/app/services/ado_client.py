@@ -247,8 +247,19 @@ async def check_project_access() -> dict[str, Any]:
         f"https://dev.azure.com/{org}/{project}/_apis/wit/workitemtypes"
         f"?api-version={_API_VERSION}"
     )
-    async with httpx.AsyncClient(timeout=_TIMEOUT_SECONDS) as client:
-        response = await client.get(url, headers=_auth_header())
+    try:
+        async with httpx.AsyncClient(timeout=_TIMEOUT_SECONDS) as client:
+            response = await client.get(url, headers=_auth_header())
+    except httpx.HTTPError as exc:
+        # No network route / DNS failure / timeout reaching ADO. Honor the
+        # "never raises" contract: report a graceful failure so run_smoke_test
+        # returns passed=False and DEMO_MODE can still carry the run forward,
+        # instead of an uncaught error killing the whole graph run.
+        return {
+            "check": "project_access",
+            "passed": False,
+            "reason": f"could not reach Azure DevOps ({type(exc).__name__})",
+        }
 
     is_json, _ = _check_json_response(response)
     if not is_json:
@@ -293,6 +304,13 @@ async def check_write_scope(lead_email: str) -> dict[str, Any]:
         )
     except RuntimeError as exc:
         return {"check": "write_scope", "passed": False, "reason": str(exc)}
+    except httpx.HTTPError as exc:
+        # Same network-unreachable guard as check_project_access — never raise.
+        return {
+            "check": "write_scope",
+            "passed": False,
+            "reason": f"could not reach Azure DevOps ({type(exc).__name__})",
+        }
     return {"check": "write_scope", "passed": True, "reason": None}
 
 

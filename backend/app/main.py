@@ -16,8 +16,10 @@ from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 
 from app.db import run_metadata, team_roster
 from app.graph.build import build_graph
+from app.routers.codebase import router as codebase_router
 from app.routers.runs import router as runs_router
 from app.routers.team import router as team_router
+from app.services import codebase_index
 
 load_dotenv()
 
@@ -27,6 +29,13 @@ async def lifespan(app: FastAPI):
     db_path = os.environ.get("CHECKPOINT_DB_PATH", "./checkpoints.sqlite")
     run_metadata.init_db()
     team_roster.init_team_table()
+    # Load the pre-built codebase RAG index once (or None if not built yet) so
+    # the "Ask the codebase" chat answers instantly without re-embedding.
+    try:
+        app.state.codebase_index = codebase_index.load_index()
+    except Exception:  # noqa: BLE001 — a bad/absent index must not block startup
+        app.state.codebase_index = None
+
     async with AsyncSqliteSaver.from_conn_string(db_path) as checkpointer:
         await checkpointer.setup()
         graph = build_graph().compile(checkpointer=checkpointer)
@@ -38,3 +47,4 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 app.include_router(runs_router)
 app.include_router(team_router)
+app.include_router(codebase_router)

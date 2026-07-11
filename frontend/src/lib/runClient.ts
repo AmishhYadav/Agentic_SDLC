@@ -77,7 +77,8 @@ export interface RunResponse {
     | "awaiting_review"
     | "completed"
     | "not_found"
-    | "blocked_smoke_test_failed";
+    | "blocked_smoke_test_failed"
+    | "failed";
   plan: Plan | null;
   push_report: PushReport | null;
   smoke_test: SmokeTest | null;
@@ -86,7 +87,13 @@ export interface RunResponse {
   risk: RiskReport | null;
   team_count: number | null;
   onboarding_summary: string | null;
+  /** Professional markdown plan document rendered from the plan JSON; null until composed. */
+  plan_document: string | null;
   demo_mode: boolean | null;
+  /** Raw LangGraph node the run is about to execute / paused inside; null once settled. */
+  current_stage: string | null;
+  /** Set only when status is "failed": the background-run crash message. */
+  error?: string | null;
 }
 
 export interface EditResponse {

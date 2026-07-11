@@ -10,7 +10,7 @@ like read_docs_greenfield's docs_text does for greenfield.
 """
 
 from app.services.embeddings import embed_texts
-from app.services.llm import build_chat_llm, llm_available
+from app.services.llm import build_chat_llm, pipeline_llm_enabled
 from app.services.rag_store import RagStore
 
 _STANDARD_QUERIES = [
@@ -113,7 +113,7 @@ def build_onboarding(store: RagStore, stats: dict) -> tuple[str, str]:
     """
     chunks = _retrieve_top_chunks(store)
 
-    if llm_available():
+    if pipeline_llm_enabled():
         try:
             summary = _llm_summary(stats, chunks)
         except Exception:  # noqa: BLE001 — demo resilience, see module docstring
