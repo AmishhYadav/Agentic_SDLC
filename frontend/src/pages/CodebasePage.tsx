@@ -30,7 +30,6 @@ const EXAMPLE_QUESTIONS = [
  */
 export default function CodebasePage() {
   const [status, setStatus] = useState<CodebaseStatus | null>(null);
-  const [repo, setRepo] = useState("");
   const [turns, setTurns] = useState<ChatTurn[]>([]);
   const [question, setQuestion] = useState("");
   const [asking, setAsking] = useState(false);
@@ -41,14 +40,7 @@ export default function CodebasePage() {
 
   useEffect(() => {
     getCodebaseStatus()
-      .then((s) => {
-        setStatus(s);
-        // Pre-fill the repo box if the current index came from a GitHub repo
-        // ("owner/name" — not a local filesystem path).
-        if (s.root && !s.root.startsWith("/") && s.root.includes("/")) {
-          setRepo(s.root);
-        }
-      })
+      .then(setStatus)
       .catch((err) => setError(err instanceof Error ? err.message : String(err)));
   }, []);
 
@@ -88,7 +80,7 @@ export default function CodebasePage() {
     setError(null);
     setReindexing(true);
     try {
-      const next = await reindexCodebase(repo);
+      const next = await reindexCodebase();
       setStatus(next);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -111,24 +103,11 @@ export default function CodebasePage() {
       {error && <p className="error-text">Error: {error}</p>}
 
       <section className="card">
-        <h2>Index</h2>
-        <p className="muted small-caption">
-          Enter a GitHub repo to clone, embed, and chat with. Leave blank to use
-          the configured source (env <code>GITHUB_REPO</code>, or this project).
-          Building a large repo can take a bit — for a snappy demo, pre-build it
-          with <code>scripts/build_codebase_index.py</code>.
-        </p>
-        <div className="row">
-          <input
-            className="text-input"
-            placeholder="owner/repo  (e.g. octocat/Hello-World)"
-            value={repo}
-            onChange={(e) => setRepo(e.target.value)}
-            disabled={reindexing}
-          />
+        <div className="doc-header">
+          <h2>Index</h2>
           <button
             type="button"
-            className="btn btn-primary"
+            className="btn btn-secondary"
             onClick={handleReindex}
             disabled={reindexing}
           >
@@ -139,6 +118,11 @@ export default function CodebasePage() {
                 : "Build index"}
           </button>
         </div>
+        <p className="muted small-caption">
+          Indexes the repo configured in <code>.env</code> (
+          <code>GITHUB_REPO</code>). Rebuild after the code changes. For a snappy
+          demo, pre-build it with <code>scripts/build_codebase_index.py</code>.
+        </p>
         {indexed ? (
           <div className="meta-row">
             {status?.root && <span className="tag">source: {status.root}</span>}
@@ -150,7 +134,7 @@ export default function CodebasePage() {
             )}
           </div>
         ) : (
-          <p className="muted">No index yet — build one to start asking.</p>
+          <p className="muted">No index yet — click Build index to start.</p>
         )}
       </section>
 
